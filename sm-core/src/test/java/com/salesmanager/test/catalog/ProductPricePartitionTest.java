@@ -82,22 +82,23 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		description.setDescription("Test product for price validation");
 		product.getDescriptions().add(description);
 
+		// Add availability with price
+		ProductAvailability availability = new ProductAvailability();
+		availability.setProduct(product);
+		availability.setProductQuantity(100);
+		
 		ProductPrice productPrice = new ProductPrice();
-		productPrice.setProduct(product);
-		productPrice.setProductPriceType(ProductPrice.DEFAULT_PRICE_TYPE);
-		productPrice.setPrice(price);
+		productPrice.setProductAvailability(availability);
+		productPrice.setProductPriceAmount(price);
+		productPrice.setProductPriceSpecialAmount(price);
+		productPrice.setCode(ProductPrice.DEFAULT_PRICE_TYPE);
 
 		ProductPriceDescription productPriceDescription = new ProductPriceDescription();
 		productPriceDescription.setProductPrice(productPrice);
 		productPriceDescription.setLanguage(en);
 		productPrice.getDescriptions().add(productPriceDescription);
 
-		product.getPrices().add(productPrice);
-
-		// Add availability
-		ProductAvailability availability = new ProductAvailability();
-		availability.setProduct(product);
-		availability.setProductQuantity(100);
+		availability.getPrices().add(productPrice);
 		product.getAvailabilities().add(availability);
 
 		productService.save(product);
@@ -119,10 +120,13 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(zeroPrice);
 
 		Assert.assertNotNull("Product should be created successfully", product);
-		Assert.assertNotNull("Product should have prices", product.getPrices());
-		Assert.assertTrue("Product should have at least one price", product.getPrices().size() > 0);
+		Assert.assertNotNull("Product should have availabilities", product.getAvailabilities());
+		Assert.assertTrue("Product should have at least one availability", product.getAvailabilities().size() > 0);
+		ProductAvailability avail = product.getAvailabilities().iterator().next();
+		Assert.assertTrue("Availability should have prices", avail.getPrices().size() > 0);
+		ProductPrice actualPrice = avail.getPrices().iterator().next();
 		Assert.assertEquals("Price should be exactly 0.00", 0, 
-			zeroPrice.compareTo(product.getPrices().iterator().next().getPrice()));
+			zeroPrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -135,8 +139,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(minimumPrice);
 
 		Assert.assertNotNull("Minimum valid price should be accepted", product);
-		Assert.assertEquals(0, minimumPrice.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, minimumPrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	// ========== PARTITION 2: NORMAL PRICE (0.01 - 999.99) ==========
@@ -152,8 +156,9 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(normalPrice);
 
 		Assert.assertNotNull("Product with normal price should be created", product);
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 		Assert.assertEquals("Normal price should be preserved", 0, 
-			normalPrice.compareTo(product.getPrices().iterator().next().getPrice()));
+			normalPrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -167,8 +172,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(minimumNormal);
 
 		Assert.assertNotNull("Minimum normal price should be accepted", product);
-		Assert.assertEquals(0, minimumNormal.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, minimumNormal.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -182,8 +187,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(maximumNormal);
 
 		Assert.assertNotNull("Maximum normal price should be accepted", product);
-		Assert.assertEquals(0, maximumNormal.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, maximumNormal.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -197,8 +202,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(midRangePrice);
 
 		Assert.assertNotNull("Mid-range price should be accepted", product);
-		Assert.assertEquals(0, midRangePrice.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, midRangePrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	// ========== PARTITION 3: HIGH PRICE (1,000.00 - 9,999.99) ==========
@@ -214,8 +219,9 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(highPrice);
 
 		Assert.assertNotNull("Product with high price should be created", product);
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 		Assert.assertEquals("High price should be preserved", 0, 
-			highPrice.compareTo(product.getPrices().iterator().next().getPrice()));
+			highPrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -229,8 +235,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(minimumHigh);
 
 		Assert.assertNotNull("Minimum high price should be accepted", product);
-		Assert.assertEquals(0, minimumHigh.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, minimumHigh.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -244,8 +250,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(maximumHigh);
 
 		Assert.assertNotNull("Maximum high price should be accepted", product);
-		Assert.assertEquals(0, maximumHigh.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, maximumHigh.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	// ========== PARTITION 4: PREMIUM PRICE (10,000.00+) ==========
@@ -261,8 +267,9 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(premiumPrice);
 
 		Assert.assertNotNull("Product with premium price should be created", product);
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 		Assert.assertEquals("Premium price should be preserved", 0, 
-			premiumPrice.compareTo(product.getPrices().iterator().next().getPrice()));
+			premiumPrice.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -276,8 +283,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(minimumPremium);
 
 		Assert.assertNotNull("Minimum premium price should be accepted", product);
-		Assert.assertEquals(0, minimumPremium.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, minimumPremium.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	/**
@@ -291,8 +298,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(extremePremium);
 
 		Assert.assertNotNull("Extreme premium price should be accepted", product);
-		Assert.assertEquals(0, extremePremium.compareTo(
-			product.getPrices().iterator().next().getPrice()));
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertEquals(0, extremePremium.compareTo(actualPrice.getProductPriceAmount()));
 	}
 
 	// ========== PARTITION 5: INVALID - NEGATIVE PRICES ==========
@@ -312,9 +319,9 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 
 		// Assert that negative prices are either rejected or corrected
 		Assert.assertNotNull("Product should handle negative price", product);
-		BigDecimal actualPrice = product.getPrices().iterator().next().getPrice();
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 		// Verify price is not negative (if validation is implemented)
-		Assert.assertTrue("Price should not be negative", actualPrice.compareTo(BigDecimal.ZERO) >= 0);
+		Assert.assertTrue("Price should not be negative", actualPrice.getProductPriceAmount().compareTo(BigDecimal.ZERO) >= 0);
 	}
 
 	/**
@@ -328,8 +335,8 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(negativeOne);
 
 		Assert.assertNotNull("Product should handle negative boundary", product);
-		BigDecimal actualPrice = product.getPrices().iterator().next().getPrice();
-		Assert.assertTrue("Price should not be below zero", actualPrice.compareTo(BigDecimal.ZERO) >= 0);
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
+		Assert.assertTrue("Price should not be below zero", actualPrice.getProductPriceAmount().compareTo(BigDecimal.ZERO) >= 0);
 	}
 
 	// ========== PARTITION 6: INVALID - DECIMAL PRECISION ==========
@@ -347,11 +354,11 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(threeDecimalPrice);
 
 		Assert.assertNotNull("Product should be created", product);
-		BigDecimal actualPrice = product.getPrices().iterator().next().getPrice();
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 
 		// Verify price is properly handled (rounding to 2 decimals)
 		Assert.assertEquals("Price should have valid monetary precision", 2, 
-			actualPrice.scale());
+			actualPrice.getProductPriceAmount().scale());
 	}
 
 	/**
@@ -365,10 +372,10 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product = createProductWithPrice(extremePrecision);
 
 		Assert.assertNotNull("Product should handle extreme decimals", product);
-		BigDecimal actualPrice = product.getPrices().iterator().next().getPrice();
+		ProductPrice actualPrice = product.getAvailabilities().iterator().next().getPrices().iterator().next();
 
 		// Verify proper rounding to monetary standards
-		Assert.assertTrue("Precision should be at most 2 decimals", actualPrice.scale() <= 2);
+		Assert.assertTrue("Precision should be at most 2 decimals", actualPrice.getProductPriceAmount().scale() <= 2);
 	}
 
 	// ========== PARTITION 7: INVALID - NULL PRICE ==========
@@ -384,9 +391,12 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		try {
 			Product product = createProductWithPrice(null);
 			// If product is created, verify price handling
-			if (product.getPrices() != null && product.getPrices().size() > 0) {
-				ProductPrice price = product.getPrices().iterator().next();
-				Assert.assertNotNull("Null price should be handled (not remain null)", price.getPrice());
+			if (product.getAvailabilities() != null && product.getAvailabilities().size() > 0) {
+				ProductAvailability avail = product.getAvailabilities().iterator().next();
+				if (avail.getPrices() != null && avail.getPrices().size() > 0) {
+					ProductPrice price = avail.getPrices().iterator().next();
+					Assert.assertNotNull("Null price should be handled (not remain null)", price.getProductPriceAmount());
+				}
 			}
 		} catch (NullPointerException | ServiceException e) {
 			// Null price rejection is also acceptable behavior
@@ -420,7 +430,10 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		for (int i = 0; i < products.size(); i++) {
 			Product product = products.get(i);
 			Assert.assertNotNull("Product " + i + " should exist", product);
-			Assert.assertTrue("Product " + i + " should have prices", product.getPrices().size() > 0);
+			Assert.assertTrue("Product " + i + " should have availabilities", 
+				product.getAvailabilities().size() > 0);
+			Assert.assertTrue("Product " + i + " should have prices", 
+				product.getAvailabilities().iterator().next().getPrices().size() > 0);
 		}
 	}
 
