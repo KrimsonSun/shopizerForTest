@@ -53,11 +53,11 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
 		ProductType generalType = productTypeService.getProductType(ProductType.GENERAL_TYPE);
 
-		// Create category
+		// Create category with unique code
+		String categoryCode = "electronics-" + System.currentTimeMillis();
 		Category electronics = new Category();
 		electronics.setMerchantStore(store);
-		electronics.setCode("electronics");
-		electronics.setActive(true);
+		electronics.setCode(categoryCode);
 
 		CategoryDescription categoryDescription = new CategoryDescription();
 		categoryDescription.setCategory(electronics);
@@ -65,14 +65,14 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		categoryDescription.setName("Electronics");
 		electronics.getDescriptions().add(categoryDescription);
 
-		categoryService.save(electronics);
+		categoryService.create(electronics);
 
-		// Create product
+		// Create product with unique SKU
+		String sku = "TEST-PRICE-" + System.currentTimeMillis();
 		Product product = new Product();
 		product.setMerchantStore(store);
-		product.setCode("TEST-PRICE-PRODUCT");
+		product.setSku(sku);
 		product.setType(generalType);
-		product.setActive(true);
 
 		ProductDescription description = new ProductDescription();
 		description.setProduct(product);
@@ -81,27 +81,31 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		description.setTitle("Test Product Title");
 		description.setDescription("Test product for price validation");
 		product.getDescriptions().add(description);
+		
+		// Add category
+		product.getCategories().add(electronics);
 
 		// Add availability with price
 		ProductAvailability availability = new ProductAvailability();
 		availability.setProduct(product);
 		availability.setProductQuantity(100);
+		availability.setRegion("*");
 		
 		ProductPrice productPrice = new ProductPrice();
 		productPrice.setProductAvailability(availability);
 		productPrice.setProductPriceAmount(price);
-		productPrice.setProductPriceSpecialAmount(price);
-		productPrice.setCode(ProductPrice.DEFAULT_PRICE_TYPE);
+		productPrice.setDefaultPrice(true);
 
 		ProductPriceDescription productPriceDescription = new ProductPriceDescription();
 		productPriceDescription.setProductPrice(productPrice);
 		productPriceDescription.setLanguage(en);
+		productPriceDescription.setName("Base price");
 		productPrice.getDescriptions().add(productPriceDescription);
 
 		availability.getPrices().add(productPrice);
 		product.getAvailabilities().add(availability);
 
-		productService.save(product);
+		productService.saveProduct(product);
 
 		return product;
 	}
