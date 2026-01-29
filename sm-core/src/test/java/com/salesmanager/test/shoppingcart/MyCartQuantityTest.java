@@ -13,18 +13,11 @@ import org.junit.Test;
 import com.salesmanager.core.model.catalog.category.Category;
 import com.salesmanager.core.model.catalog.category.CategoryDescription;
 import com.salesmanager.core.model.catalog.product.Product;
-import com.salesmanager.core.model.catalog.product.attribute.ProductAttribute;
-import com.salesmanager.core.model.catalog.product.attribute.ProductOption;
-import com.salesmanager.core.model.catalog.product.attribute.ProductOptionDescription;
-import com.salesmanager.core.model.catalog.product.attribute.ProductOptionType;
-import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValue;
-import com.salesmanager.core.model.catalog.product.attribute.ProductOptionValueDescription;
 import com.salesmanager.core.model.catalog.product.availability.ProductAvailability;
 import com.salesmanager.core.model.catalog.product.description.ProductDescription;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
 import com.salesmanager.core.model.catalog.product.manufacturer.ManufacturerDescription;
 import com.salesmanager.core.model.catalog.product.price.ProductPrice;
-import com.salesmanager.core.model.catalog.product.price.ProductPriceDescription;
 import com.salesmanager.core.model.catalog.product.type.ProductType;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -32,11 +25,19 @@ import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import com.salesmanager.core.model.shoppingcart.ShoppingCartItem;
 
 /**
- * Project 1: Partition Testing for Shopping Cart Quantity
- * 1. Valid (1-10)
- * 2. Invalid (Negative)
- * 3. Invalid (Zero)
- * 4. Invalid (Over Stock > 10)
+ * Project 1: Extended Partition Testing for Shopping Cart Quantity
+ * Enhanced version with comprehensive test coverage
+ * 
+ * Partitions:
+ * 1. Valid Range (1-10): Boundary and representative values
+ * 2. Invalid Negative: Negative quantities
+ * 3. Invalid Zero: Zero quantity
+ * 4. Invalid Over Stock: Exceeds available inventory
+ * 5. Boundary Values: Edge cases at partition boundaries
+ * 6. Extreme Values: Very large numbers
+ * 7. Multiple Items: Cart with multiple products
+ * 
+ * Total Test Cases: 13 (expanded from original 4)
  */
 public class MyCartQuantityTest extends com.salesmanager.test.common.AbstractSalesManagerCoreTestCase {
 
@@ -208,5 +209,188 @@ public class MyCartQuantityTest extends com.salesmanager.test.common.AbstractSal
         shoppingCart.getLineItems().add(item);
 
         shoppingCartService.create(shoppingCart);
+    }
+    
+    // ==========================================
+    // 新增測試用例：更全面的覆蓋
+    // ==========================================
+    
+    /**
+     * Partition 5: 邊界值測試 - 最小有效數量
+     * 測試：加入 1 個商品（最小有效值）
+     * 預期：成功
+     */
+    @Test
+    public void testAddToCart_MinimumValidQuantity() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(1);  // 最小有效值
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+
+        ShoppingCart retrievedCart = shoppingCartService.getByCode(shoppingCart.getShoppingCartCode(), store);
+        Assert.assertNotNull(retrievedCart);
+        Assert.assertEquals(1, retrievedCart.getLineItems().iterator().next().getQuantity().intValue());
+    }
+    
+    /**
+     * Partition 5: 邊界值測試 - 最大有效數量
+     * 測試：加入 10 個商品（正好等於庫存，最大有效值）
+     * 預期：成功
+     */
+    @Test
+    public void testAddToCart_MaximumValidQuantity() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(10);  // 最大有效值（正好等於庫存）
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+
+        ShoppingCart retrievedCart = shoppingCartService.getByCode(shoppingCart.getShoppingCartCode(), store);
+        Assert.assertNotNull(retrievedCart);
+        Assert.assertEquals(10, retrievedCart.getLineItems().iterator().next().getQuantity().intValue());
+    }
+    
+    /**
+     * Partition 1: 有效區間 - 中間值
+     * 測試：加入 3 個商品（有效範圍中的另一個代表值）
+     * 預期：成功
+     */
+    @Test
+    public void testAddToCart_MidRangeQuantity() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(3);
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+
+        ShoppingCart retrievedCart = shoppingCartService.getByCode(shoppingCart.getShoppingCartCode(), store);
+        Assert.assertNotNull(retrievedCart);
+        Assert.assertEquals(3, retrievedCart.getLineItems().iterator().next().getQuantity().intValue());
+    }
+    
+    /**
+     * Partition 2: 無效區間 - 極端負數
+     * 測試：加入 -100 個商品（極端負數）
+     * 預期：應該要報錯 (Exception)
+     */
+    @Test(expected = Exception.class)
+    public void testAddToCart_ExtremeNegativeQuantity() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(-100);  // 極端負數
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+    }
+    
+    /**
+     * Partition 4: 無效區間 - 遠超庫存
+     * 測試：加入 100 個商品（遠遠超過庫存 10）
+     * 預期：應該要報錯 (Exception)
+     */
+    @Test(expected = Exception.class)
+    public void testAddToCart_ExtremeOverStock() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(100);  // 遠超庫存
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+    }
+    
+    /**
+     * Partition 6: 邊界值測試 - 超出庫存1個
+     * 測試：加入 11 個商品（剛好超出庫存 1 個）
+     * 預期：應該要報錯 (Exception)
+     */
+    @Test(expected = Exception.class)
+    public void testAddToCart_OneOverStock() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(11);  // 剛好超出 1 個
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+    }
+    
+    /**
+     * Partition 7: 多商品測試
+     * 測試：購物車中添加兩個不同數量的相同商品條目
+     * 預期：兩個條目都能成功添加
+     */
+    @Test
+    public void testAddToCart_MultipleItems() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        // 第一個商品條目：2個
+        ShoppingCartItem item1 = new ShoppingCartItem(shoppingCart, product);
+        item1.setSku(product.getSku());
+        item1.setQuantity(2);
+        shoppingCart.getLineItems().add(item1);
+
+        // 第二個商品條目：3個
+        ShoppingCartItem item2 = new ShoppingCartItem(shoppingCart, product);
+        item2.setSku(product.getSku());
+        item2.setQuantity(3);
+        shoppingCart.getLineItems().add(item2);
+
+        shoppingCartService.create(shoppingCart);
+
+        ShoppingCart retrievedCart = shoppingCartService.getByCode(shoppingCart.getShoppingCartCode(), store);
+        Assert.assertNotNull(retrievedCart);
+        Assert.assertEquals(2, retrievedCart.getLineItems().size());
+    }
+    
+    /**
+     * Partition 1: 有效區間 - 上邊界附近
+     * 測試：加入 9 個商品（接近最大值但在有效範圍內）
+     * 預期：成功
+     */
+    @Test
+    public void testAddToCart_NearMaximumQuantity() throws Exception {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setMerchantStore(store);
+        shoppingCart.setShoppingCartCode(UUID.randomUUID().toString());
+
+        ShoppingCartItem item = new ShoppingCartItem(shoppingCart, product);
+        item.setSku(product.getSku());
+        item.setQuantity(9);  // 接近最大值
+
+        shoppingCart.getLineItems().add(item);
+        shoppingCartService.create(shoppingCart);
+
+        ShoppingCart retrievedCart = shoppingCartService.getByCode(shoppingCart.getShoppingCartCode(), store);
+        Assert.assertNotNull(retrievedCart);
+        Assert.assertEquals(9, retrievedCart.getLineItems().iterator().next().getQuantity().intValue());
     }
 }
