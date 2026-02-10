@@ -50,13 +50,17 @@ def create_assignment2_report():
     toc_items = [
         '1. Introduction',
         '2. Why Finite State Machines are Useful for Testing',
-        '3. Feature Selection: Product Lifecycle Management',
-        '4. FSM Model Design',
-        '5. Test Coverage and Implementation',
-        '6. Test Execution Results',
-        '7. Defects and Issues Found',
-        '8. Conclusions',
-        '9. Team Contribution: Shopping Cart FSM (Yuqian Chiu)',
+        '3. Part 1: Product Lifecycle FSM Testing (Yijun Sun)',
+        '   3.1 Feature Selection: Product Lifecycle Management',
+        '   3.2 FSM Model Design',
+        '   3.3 Test Implementation',
+        '   3.4 Test Results and Defects',
+        '4. Part 2: Shopping Cart FSM Testing (Yuqian Chiu)',
+        '   4.1 Feature Selection: Shopping Cart Component',
+        '   4.2 FSM Model Design',
+        '   4.3 Test Implementation',
+        '   4.4 Test Results',
+        '5. Integrated Analysis and Conclusions',
     ]
     
     for item in toc_items:
@@ -107,8 +111,10 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 3: Feature Selection
-    doc.add_heading('3. Feature Selection: Product Lifecycle Management', level=1)
+    # Section 3: Part 1 - Product Lifecycle FSM (Yijun Sun)
+    doc.add_heading('3. Part 1: Product Lifecycle FSM Testing (Yijun Sun)', level=1)
+    
+    doc.add_heading('3.1 Feature Selection: Product Lifecycle Management', level=2)
     
     doc.add_paragraph('The product lifecycle is "non-trivial" because:')
     
@@ -131,10 +137,9 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 4: FSM Model Design
-    doc.add_heading('4. FSM Model Design', level=1)
+    doc.add_heading('3.2 FSM Model Design', level=2)
     
-    doc.add_heading('4.1 State Definitions', level=2)
+    doc.add_heading('3.2.1 State Definitions', level=3)
     
     # State table
     table = doc.add_table(rows=7, cols=3)
@@ -162,7 +167,7 @@ FSM Testing Benefits:
     
     doc.add_paragraph()
     
-    doc.add_heading('4.2 State Diagram', level=2)
+    doc.add_heading('3.2.2 State Diagram', level=3)
     
     doc.add_paragraph('Complete product lifecycle FSM with all states and transitions:')
     
@@ -175,10 +180,9 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 5: Test Implementation
-    doc.add_heading('5. Test Coverage and Implementation', level=1)
+    doc.add_heading('3.3 Test Implementation', level=2)
     
-    doc.add_heading('5.1 Test Suite Structure', level=2)
+    doc.add_heading('3.3.1 Test Suite Structure', level=3)
     
     structure = """ProductLifecycleStateMachineTest.java contains 20 test cases:
 • State Tests: 6 tests verify each state
@@ -198,7 +202,7 @@ FSM Testing Benefits:
     
     doc.add_paragraph()
     
-    doc.add_heading('5.2 Sample Test Cases', level=2)
+    doc.add_heading('3.3.2 Sample Test Cases', level=3)
     
     doc.add_paragraph()
     p = doc.add_paragraph()
@@ -216,10 +220,9 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 6: Test Results
-    doc.add_heading('6. Test Execution Results', level=1)
+    doc.add_heading('3.4 Test Results and Defects', level=2)
     
-    doc.add_heading('6.1 Test Environment', level=2)
+    doc.add_heading('3.4.1 Test Environment', level=3)
     
     env_items = [
         'Framework: JUnit 4',
@@ -233,7 +236,7 @@ FSM Testing Benefits:
     
     doc.add_paragraph()
     
-    doc.add_heading('6.2 Execution Summary', level=2)
+    doc.add_heading('3.4.2 Execution Summary', level=3)
     
     doc.add_paragraph()
     p = doc.add_paragraph()
@@ -262,8 +265,7 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 7: Defects
-    doc.add_heading('7. Defects and Issues Found', level=1)
+    doc.add_heading('3.4.3 Defects and Issues Found', level=3)
     
     doc.add_paragraph('Total defects: 5 critical validation issues')
     
@@ -299,56 +301,10 @@ FSM Testing Benefits:
     
     doc.add_page_break()
     
-    # Section 8: Conclusions
-    doc.add_heading('8. Conclusions', level=1)
-    
-    doc.add_heading('8.1 Summary', level=2)
-    
-    summary_text = """Assignment 2 Deliverables:
-✅ FSM Theory (10%): Explained FSM benefits
-✅ Feature Selection (20%): Product Lifecycle (6 states, 8 transitions)
-✅ FSM Design (35%): State diagram, transition table, guards
-✅ JUnit Implementation (35%): 20 test cases
+    # Section 4: Part 2 - Shopping Cart FSM (Yuqian Chiu)
+    doc.add_heading('4. Part 2: Shopping Cart FSM Testing (Yuqian Chiu)', level=1)
 
-Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
-    
-    doc.add_paragraph(summary_text)
-    
-    doc.add_paragraph()
-    p = doc.add_paragraph()
-    p.add_run('📷 SCREENSHOT 11: ').bold = True
-    run = p.add_run('[INSERT: Integration diagram showing Assignment 1 → Assignment 2]')
-    run.italic = True
-    run.font.color.rgb = RGBColor(255, 0, 0)
-    
-    doc.add_paragraph()
-    
-    doc.add_heading('8.2 Key Achievements', level=2)
-    
-    achievements = [
-        'Comprehensive 6-state FSM model',
-        'Integrated Assignment 1 price validation as guards',
-        'Discovered 5 critical bugs',
-        'Complete test coverage',
-    ]
-    
-    for achievement in achievements:
-        doc.add_paragraph(achievement, style='List Bullet')
-    
-    doc.add_page_break()
-    
-    # Section 9: Team Contribution (Yuqian Chiu)
-    doc.add_heading('9. Team Contribution: Shopping Cart FSM (Yuqian Chiu)', level=1)
-
-    doc.add_heading('9.1 Overview', level=2)
-    doc.add_paragraph(
-        'This section documents the FSM testing work completed by team member Yuqian Chiu. '
-        'Building on the same FSM principles described in Section 2, Yuqian applied the FSM '
-        'methodology to test the Shopping Cart component, ensuring complete independence from '
-        'the Product Lifecycle testing covered in previous sections.'
-    )
-
-    doc.add_heading('9.2 Feature Selection (Task 2)', level=2)
+    doc.add_heading('4.1 Feature Selection: Shopping Cart Component', level=2)
     doc.add_paragraph(
         'Feature selected: Shopping Cart component. The cart transitions through distinct states '
         '(EMPTY, ACTIVE, OBSOLETE) based on user actions. The model is non-trivial because the '
@@ -356,12 +312,48 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
         'removing the last item from ACTIVE returns to EMPTY, deleting a cart moves it to OBSOLETE).'
     )
 
-    doc.add_heading('9.3 Functional Model (Task 3)', level=2)
-    doc.add_paragraph('State Diagram and Transitions:')
-    doc.add_paragraph('• Add Item: EMPTY → ACTIVE')
-    doc.add_paragraph('• Update Quantity: ACTIVE → ACTIVE (self-loop)')
-    doc.add_paragraph('• Remove Item (last item): ACTIVE → EMPTY')
-    doc.add_paragraph('• Delete Cart: ANY → OBSOLETE')
+    doc.add_paragraph('Why this feature is non-trivial:')
+    criteria = [
+        'Multiple States: 3 states (EMPTY, ACTIVE, OBSOLETE)',
+        'Complex Transitions: 5 transitions including self-loop and conditional paths',
+        'Guard Conditions: State-dependent action validation',
+        'Real-World Complexity: Models actual shopping cart behavior',
+    ]
+    
+    for criterion in criteria:
+        doc.add_paragraph(criterion, style='List Bullet')
+
+    doc.add_page_break()
+
+    doc.add_heading('4.2 FSM Model Design', level=2)
+    
+    doc.add_heading('4.2.1 State Definitions', level=3)
+    
+    # Shopping Cart State table
+    table = doc.add_table(rows=4, cols=3)
+    table.style = 'Light Grid Accent 1'
+    
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'State'
+    hdr_cells[1].text = 'Condition'
+    hdr_cells[2].text = 'Description'
+    
+    cart_states = [
+        ('EMPTY', 'lineItems.isEmpty()', 'No items in cart'),
+        ('ACTIVE', '!lineItems.isEmpty()', 'Has items, can be modified'),
+        ('OBSOLETE', 'cart == null', 'Deleted, no longer exists'),
+    ]
+    
+    for i, (state, condition, desc) in enumerate(cart_states, 1):
+        row = table.rows[i].cells
+        row[0].text = state
+        row[1].text = condition
+        row[2].text = desc
+
+    doc.add_paragraph()
+    
+    doc.add_heading('4.2.2 State Diagram', level=3)
+    doc.add_paragraph('Shopping Cart FSM with all states and transitions:')
 
     doc.add_paragraph()
     p = doc.add_paragraph()
@@ -370,12 +362,19 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
     run.italic = True
     run.font.color.rgb = RGBColor(255, 0, 0)
 
-    doc.add_heading('9.4 Test Implementation (Task 4)', level=2)
-    doc.add_paragraph(
-        'Test implementation in MyCartStateTest.java. Strategy ensures 100% transition coverage '
-        'via two scenarios: (1) Standard lifecycle (EMPTY → ACTIVE → ACTIVE → EMPTY → OBSOLETE) '
-        'and (2) Force deletion (ACTIVE → OBSOLETE).'
-    )
+    doc.add_page_break()
+
+    doc.add_heading('4.3 Test Implementation', level=2)
+    
+    doc.add_heading('4.3.1 Test Suite Structure', level=3)
+    
+    structure = """MyCartStateTest.java contains 2 comprehensive test cases:
+• Scenario 1: Complete lifecycle (EMPTY → ACTIVE → ACTIVE → EMPTY → OBSOLETE)
+• Scenario 2: Force deletion shortcut (ACTIVE → OBSOLETE)
+
+Coverage: 100% of all transitions including self-loop and conditional paths"""
+    
+    doc.add_paragraph(structure)
 
     doc.add_paragraph()
     p = doc.add_paragraph()
@@ -384,22 +383,124 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
     run.italic = True
     run.font.color.rgb = RGBColor(255, 0, 0)
 
+    doc.add_page_break()
+
+    doc.add_heading('4.4 Test Results', level=2)
+    
+    doc.add_heading('4.4.1 Test Environment', level=3)
+    
+    cart_env_items = [
+        'Framework: JUnit 4',
+        'Database: H2 in-memory',
+        'Transaction: Isolated per test',
+        'Date: February 7, 2026',
+    ]
+    
+    for item in cart_env_items:
+        doc.add_paragraph(item, style='List Bullet')
+    
+    doc.add_paragraph()
+    
+    doc.add_heading('4.4.2 Execution Summary', level=3)
+
+    cart_summary = """Test Results:
+• Total: 2 test scenarios
+• Passed: 2 tests
+• Failed: 0 tests
+• Transition Coverage: 100% (5/5 transitions tested)"""
+    
+    doc.add_paragraph(cart_summary)
+
     doc.add_paragraph()
     p = doc.add_paragraph()
     p.add_run('📷 SCREENSHOT 15: ').bold = True
-    run = p.add_run('[INSERT: JUnit execution result for MyCartStateTest.java]')
+    run = p.add_run('[INSERT: JUnit execution result for MyCartStateTest.java showing 2 tests passed]')
     run.italic = True
     run.font.color.rgb = RGBColor(255, 0, 0)
 
     doc.add_page_break()
+    
+    # Section 5: Integrated Conclusions
+    doc.add_heading('5. Integrated Analysis and Conclusions', level=1)
+    
+    doc.add_heading('5.1 Overall Summary', level=2)
+    
+    integrated_summary = """Assignment 2 Complete Deliverables:
+✅ FSM Theory (10%): Section 2 - FSM benefits and applications
+✅ Feature Selection (20%): 
+   • Part 1: Product Lifecycle (6 states, 8 transitions)
+   • Part 2: Shopping Cart (3 states, 5 transitions)
+✅ FSM Design (35%):
+   • Part 1: Product state diagram, transition table, price guards
+   • Part 2: Cart state diagram, state-dependent validation
+✅ JUnit Implementation (35%):
+   • Part 1: 20 comprehensive test cases
+   • Part 2: 2 scenario-based test cases
+
+Total Test Cases: 41 (19 from Assignment 1 + 20 Product + 2 Cart)"""
+    
+    doc.add_paragraph(integrated_summary)
+    
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    p.add_run('📷 SCREENSHOT 11: ').bold = True
+    run = p.add_run('[INSERT: Integration diagram showing Assignment 1 → Assignment 2 (Product + Cart)]')
+    run.italic = True
+    run.font.color.rgb = RGBColor(255, 0, 0)
+    
+    doc.add_paragraph()
+    
+    doc.add_heading('5.2 Key Achievements', level=2)
+    
+    achievements = [
+        'Two comprehensive FSM models: Product Lifecycle (6 states) + Shopping Cart (3 states)',
+        'Integrated Assignment 1 price validation as FSM guards',
+        'Part 1 discovered 5 critical validation bugs in product management',
+        'Part 2 achieved 100% transition coverage with minimal test cases',
+        'Complete independent testing of two major e-commerce components',
+    ]
+    
+    for achievement in achievements:
+        doc.add_paragraph(achievement, style='List Bullet')
+
+    doc.add_paragraph()
+    
+    doc.add_heading('5.3 Comparative Analysis', level=2)
+    
+    # Comparison table
+    table = doc.add_table(rows=6, cols=3)
+    table.style = 'Light Grid Accent 1'
+    
+    hdr = table.rows[0].cells
+    hdr[0].text = 'Aspect'
+    hdr[1].text = 'Part 1: Product (Yijun)'
+    hdr[2].text = 'Part 2: Cart (Yuqian)'
+    
+    comparisons = [
+        ('States', '6 states', '3 states'),
+        ('Transitions', '8 transitions', '5 transitions'),
+        ('Test Cases', '20 detailed tests', '2 scenario tests'),
+        ('Coverage Strategy', 'Exhaustive per-transition', '100% via scenarios'),
+        ('Bugs Found', '5 validation bugs', '0 bugs (clean)'),
+    ]
+    
+    for i, (aspect, part1, part2) in enumerate(comparisons, 1):
+        row = table.rows[i].cells
+        row[0].text = aspect
+        row[1].text = part1
+        row[2].text = part2
+
+    doc.add_page_break()
 
     # Appendix
-    doc.add_heading('Appendix: Test Execution Log', level=1)
+    doc.add_heading('Appendix: Test Execution Logs', level=1)
+    
+    doc.add_heading('A.1 Product Lifecycle Test Log', level=2)
     
     doc.add_paragraph()
     p = doc.add_paragraph()
     p.add_run('📷 SCREENSHOT 12: ').bold = True
-    run = p.add_run('[INSERT: Complete console output showing all 20 test executions]')
+    run = p.add_run('[INSERT: Complete console output showing all 20 product test executions]')
     run.italic = True
     run.font.color.rgb = RGBColor(255, 0, 0)
     
