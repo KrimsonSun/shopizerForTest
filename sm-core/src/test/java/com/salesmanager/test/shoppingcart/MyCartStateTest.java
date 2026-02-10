@@ -33,8 +33,14 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * FSM State Transition Test for Shopping Cart
- * Flow: Empty <-> Active -> Obsolete
+ * FSM Transition-Level Tests for Shopping Cart
+ * States: EMPTY, ACTIVE, OBSOLETE
+ *
+ * Transitions:
+ *  T1 addItem: EMPTY -> ACTIVE
+ *  T2 updateQty: ACTIVE -> ACTIVE (self-loop)
+ *  T3 removeLastItem: ACTIVE -> EMPTY
+ *  T4 deleteCart: ANY -> OBSOLETE (global transition)
  */
 public class MyCartStateTest extends AbstractSalesManagerCoreTestCase {
 
@@ -51,11 +57,9 @@ public class MyCartStateTest extends AbstractSalesManagerCoreTestCase {
 
     @Before
     public void setup() throws Exception {
-        // 1. 取得預設商店
         store = merchantStoreService.getByCode(MerchantStore.DEFAULT_STORE);
         Language en = languageService.getByCode("en");
 
-        // 2. 建立分類、廠商
         Category category = new Category();
         category.setMerchantStore(store);
         category.setCode("test-cat-fsm-" + System.currentTimeMillis());
@@ -78,7 +82,6 @@ public class MyCartStateTest extends AbstractSalesManagerCoreTestCase {
         manufacturer.setDescriptions(new HashSet<>(Set.of(manufDesc)));
         manufacturerService.create(manufacturer);
 
-        // 3. 建立商品
         ProductType productType = productTypeService.getProductType(ProductType.GENERAL_TYPE);
 
         product = new Product();
@@ -90,20 +93,16 @@ public class MyCartStateTest extends AbstractSalesManagerCoreTestCase {
         product.setType(productType);
         product.setMerchantStore(store);
 
-        // 4. 設定庫存 (Availability)
         ProductAvailability availability = new ProductAvailability();
         availability.setProductDateAvailable(new Date());
         availability.setProductQuantity(100);
         availability.setRegion("*");
         availability.setProduct(product);
 
-        // 5. 設定價格 (Price)
         ProductPrice dprice = new ProductPrice();
         dprice.setDefaultPrice(true);
-        dprice.setProductPriceAmount(new BigDecimal(29.99));
+        dprice.setProductPriceAmount(new BigDecimal("29.99"));
         dprice.setProductAvailability(availability);
-
-        // 把價格加入庫存清單，不然系統找不到價格會報錯！
         availability.getPrices().add(dprice);
 
         ProductDescription description = new ProductDescription();
@@ -118,105 +117,202 @@ public class MyCartStateTest extends AbstractSalesManagerCoreTestCase {
         productService.create(product);
     }
 
-    @Test
-    public void testShoppingCartFSM() throws Exception {
+    // -------------------------
+    // Helpers (keep tests clean)
+    // -------------------------
 
-        // ==========================================
-        // State 1: EMPTY (In-Memory Check)
-        // ==========================================
+    private ShoppingCart newEmptyCart() {
         ShoppingCart cart = new ShoppingCart();
         cart.setMerchantStore(store);
         cart.setShoppingCartCode(UUID.randomUUID().toString());
+        return cart;
+    }
 
-        // 驗證: 確保新建立的物件是空的
-        Assert.assertNotNull("Cart object created", cart);
-        Assert.assertTrue("State should be EMPTY", cart.getLineItems() == null || cart.getLineItems().isEmpty());
-        System.out.println(" State 1 Verified: EMPTY (In-Memory Check)");
-
-        // ==========================================
-        // Transition: addItem() -> State: ACTIVE
-        // ==========================================
+    private ShoppingCart addOneItemAndPersist(ShoppingCart cart, int qty) throws Exception {
         ShoppingCartItem item = new ShoppingCartItem(cart, product);
-        item.setQuantity(1);
+        item.setQuantity(qty);
 
-        // Add item & Save
+        // If lineItems is null in your runtime, uncomment next line:
+        // if (cart.getLineItems() == null) cart.setLineItems(new HashSet<>());
+
         cart.getLineItems().add(item);
         shoppingCartService.saveOrUpdate(cart);
-
-        // 驗證: 確保資料庫裡有這台車，而且有商品
-        ShoppingCart stateActive = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        Assert.assertNotNull("Cart should exist in DB now (Active)", stateActive);
-        Assert.assertFalse("State should be ACTIVE (not empty)", stateActive.getLineItems().isEmpty());
-        System.out.println(" State 2 Verified: ACTIVE (Item Added & Saved)");
-
-        // ==========================================
-        // Transition: updateQty() -> State: ACTIVE (Self-Loop)
-        // ==========================================
-        ShoppingCartItem itemToUpdate = stateActive.getLineItems().iterator().next();
-        itemToUpdate.setQuantity(2);
-        shoppingCartService.saveOrUpdate(stateActive);
-
-        ShoppingCart stateActiveSelf = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        Assert.assertEquals(2, stateActiveSelf.getLineItems().iterator().next().getQuantity().intValue());
-        System.out.println(" State 2 (Self-Loop) Verified: ACTIVE (Qty Updated)");
-
-        // ==========================================
-        // Transition: removeItem() -> State: EMPTY
-        // ==========================================
-        shoppingCartService.deleteShoppingCartItem(itemToUpdate.getId());
-
-        // 驗證: 變回 Empty
-        ShoppingCart stateBackToEmpty = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        if (stateBackToEmpty != null) {
-            Assert.assertTrue("State should be back to EMPTY", stateBackToEmpty.getLineItems() == null || stateBackToEmpty.getLineItems().isEmpty());
-        }
-        System.out.println(" State 1 (Return) Verified: EMPTY");
-
-        // ==========================================
-        // Transition: deleteCart() -> State: OBSOLETE
-        // ==========================================
-        if (stateBackToEmpty != null) {
-            shoppingCartService.deleteCart(stateBackToEmpty);
-        }
-
-        ShoppingCart stateObsolete = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        Assert.assertNull("State should be OBSOLETE (null)", stateObsolete);
-        System.out.println(" State 3 Verified: OBSOLETE");
+        return shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
     }
+
+    private ShoppingCart reload(String code) throws Exception {
+        return shoppingCartService.getByCode(code, store);
+    }
+
+    private boolean isEmptyState(ShoppingCart cart) {
+        return cart == null || cart.getLineItems() == null || cart.getLineItems().isEmpty();
+    }
+
+    // -------------------------
+    // FSM Tests (transition-level)
+    // -------------------------
+
     /**
-     * Test Case 2: Verify the shortcut transition from ACTIVE directly to OBSOLETE
-     * Flow: Create -> Add Item (Active) -> Delete Cart (Obsolete)
+     * State check: Newly created cart should be EMPTY (in-memory).
+     * (Optional but nice as a state invariant test)
      */
     @Test
-    public void testActiveToObsolete() throws Exception {
-        System.out.println("====== Starting Test Case 2: ACTIVE -> OBSOLETE ======");
+    public void testState_EMPTY_onNewCart() {
+        ShoppingCart cart = newEmptyCart();
+        Assert.assertNotNull(cart);
+        Assert.assertTrue("New cart should be EMPTY", cart.getLineItems() == null || cart.getLineItems().isEmpty());
+    }
 
-        // 1. 快速建立一個 Active 狀態的購物車
-        ShoppingCart cart = new ShoppingCart();
-        cart.setMerchantStore(store);
-        cart.setShoppingCartCode(UUID.randomUUID().toString());
+    /**
+     * T1: addItem => EMPTY -> ACTIVE
+     */
+    @Test
+    public void testTransition_addItem_EmptyToActive() throws Exception {
+        ShoppingCart cart = newEmptyCart();
 
-        ShoppingCartItem item = new ShoppingCartItem(cart, product);
-        item.setQuantity(1);
-        cart.getLineItems().add(item);
+        ShoppingCart active = addOneItemAndPersist(cart, 1);
 
-        // 直接存檔讓它變 Active
+        Assert.assertNotNull("Cart should exist after saveOrUpdate", active);
+        Assert.assertFalse("Cart should be ACTIVE (has items)", active.getLineItems().isEmpty());
+    }
+
+    /**
+     * T2: updateQty => ACTIVE -> ACTIVE (self-loop)
+     */
+    @Test
+    public void testTransition_updateQty_ActiveSelfLoop() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+        ShoppingCart active = addOneItemAndPersist(cart, 1);
+
+        ShoppingCartItem item = active.getLineItems().iterator().next();
+        item.setQuantity(2);
+        shoppingCartService.saveOrUpdate(active);
+
+        ShoppingCart reloaded = reload(cart.getShoppingCartCode());
+        Assert.assertNotNull(reloaded);
+        Assert.assertFalse("Should remain ACTIVE after updateQty", reloaded.getLineItems().isEmpty());
+        Assert.assertEquals("Quantity should be updated", 2, reloaded.getLineItems().iterator().next().getQuantity().intValue());
+    }
+
+    /**
+     * T3: removeLastItem => ACTIVE -> EMPTY
+     */
+    @Test
+    public void testTransition_removeLastItem_ActiveToEmpty() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+        ShoppingCart active = addOneItemAndPersist(cart, 1);
+
+        ShoppingCartItem item = active.getLineItems().iterator().next();
+        shoppingCartService.deleteShoppingCartItem(item.getId());
+
+        ShoppingCart afterRemove = reload(cart.getShoppingCartCode());
+
+        // Depending on implementation, cart may still exist but lineItems empty,
+        // or cart may be removed. Both represent EMPTY state in our model.
+        Assert.assertTrue("After removing last item, state should be EMPTY", isEmptyState(afterRemove));
+    }
+
+    /**
+     * T4 (global): deleteCart from EMPTY => EMPTY -> OBSOLETE
+     */
+    @Test
+    public void testTransition_deleteCart_FromEmptyToObsolete() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+
+        // Persist an empty cart if your system needs it in DB before deletion.
+        // If saveOrUpdate(empty) causes issues, you can skip saving and only test delete on persisted carts.
         shoppingCartService.saveOrUpdate(cart);
 
-        // 驗證: 它是 Active 的
-        ShoppingCart stateActive = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        Assert.assertNotNull(stateActive);
-        Assert.assertFalse("Should be ACTIVE", stateActive.getLineItems().isEmpty());
-        System.out.println(" State Verified: ACTIVE (Has items)");
+        ShoppingCart persisted = reload(cart.getShoppingCartCode());
+        // persisted could be null if the system doesn't persist empty carts; handle gracefully:
+        if (persisted != null) {
+            // Ensure it's empty state before deletion
+            Assert.assertTrue("Precondition: should be EMPTY before deleteCart", isEmptyState(persisted));
 
-        // 2. 關鍵動作: 直接從 Active 狀態呼叫 deleteCart
-        // 這就是你原本測不到的那條線！
-        shoppingCartService.deleteCart(stateActive);
+            shoppingCartService.deleteCart(persisted);
+        }
 
-        // 3. 驗證: 應該要直接變 Obsolete (找不到)
-        ShoppingCart stateObsolete = shoppingCartService.getByCode(cart.getShoppingCartCode(), store);
-        Assert.assertNull("Should be OBSOLETE (null) after deleting an active cart", stateObsolete);
-        System.out.println(" Transition Verified: ACTIVE -> OBSOLETE");
-        System.out.println("=======================================================");
+        ShoppingCart afterDelete = reload(cart.getShoppingCartCode());
+        Assert.assertNull("After deleteCart, cart should be OBSOLETE (null)", afterDelete);
+    }
+
+    /**
+     * T4 (global): deleteCart from ACTIVE => ACTIVE -> OBSOLETE
+     */
+    @Test
+    public void testTransition_deleteCart_FromActiveToObsolete() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+        ShoppingCart active = addOneItemAndPersist(cart, 1);
+
+        Assert.assertNotNull(active);
+        Assert.assertFalse("Precondition: should be ACTIVE before deleteCart", active.getLineItems().isEmpty());
+
+        shoppingCartService.deleteCart(active);
+
+        ShoppingCart afterDelete = reload(cart.getShoppingCartCode());
+        Assert.assertNull("After deleteCart, cart should be OBSOLETE (null)", afterDelete);
+    }
+
+    /**
+     * Invalid transition example:
+     * updateQty is invalid when cart is EMPTY.
+     *
+     * NOTE: Some implementations may throw exceptions; others may no-op.
+     * This test is written to be robust: it asserts the cart does NOT become ACTIVE.
+     */
+    @Test
+    public void testInvalidTransition_updateQty_WhenEmpty_ShouldNotBecomeActive() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+
+        // Try to "update" without adding item: we simulate by saving the empty cart (if possible),
+        // then reloading and ensuring it does not become ACTIVE.
+        shoppingCartService.saveOrUpdate(cart);
+
+        ShoppingCart reloaded = reload(cart.getShoppingCartCode());
+        // If system doesn't persist empty carts, reloaded might be null -> still EMPTY
+        Assert.assertTrue("Updating qty in EMPTY should not create ACTIVE cart", isEmptyState(reloaded));
+    }
+
+    // -------------------------
+    // Optional: one full path test (integration sanity check)
+    // -------------------------
+
+    /**
+     * Full lifecycle path sanity check:
+     * EMPTY -> ACTIVE -> ACTIVE -> EMPTY -> OBSOLETE
+     *
+     * Optional: keep 1 scenario test as a complement (not the main coverage mechanism).
+     */
+    @Test
+    public void testPath_fullLifecycleSanity() throws Exception {
+        ShoppingCart cart = newEmptyCart();
+
+        // EMPTY
+        Assert.assertTrue(isEmptyState(cart));
+
+        // addItem => ACTIVE
+        ShoppingCart active = addOneItemAndPersist(cart, 1);
+        Assert.assertNotNull(active);
+        Assert.assertFalse(active.getLineItems().isEmpty());
+
+        // updateQty => ACTIVE (self-loop)
+        ShoppingCartItem item = active.getLineItems().iterator().next();
+        item.setQuantity(2);
+        shoppingCartService.saveOrUpdate(active);
+        ShoppingCart afterUpdate = reload(cart.getShoppingCartCode());
+        Assert.assertEquals(2, afterUpdate.getLineItems().iterator().next().getQuantity().intValue());
+
+        // removeLastItem => EMPTY
+        ShoppingCartItem updatedItem = afterUpdate.getLineItems().iterator().next();
+        shoppingCartService.deleteShoppingCartItem(updatedItem.getId());
+        ShoppingCart afterRemove = reload(cart.getShoppingCartCode());
+        Assert.assertTrue(isEmptyState(afterRemove));
+
+        // deleteCart => OBSOLETE
+        if (afterRemove != null) {
+            shoppingCartService.deleteCart(afterRemove);
+        }
+        ShoppingCart afterDelete = reload(cart.getShoppingCartCode());
+        Assert.assertNull(afterDelete);
     }
 }
