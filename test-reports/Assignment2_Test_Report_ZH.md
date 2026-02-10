@@ -18,6 +18,7 @@
 6. [测试执行结果](#6-测试执行结果)
 7. [发现的缺陷与问题](#7-发现的缺陷与问题)
 8. [结论](#8-结论)
+9. [邱宇谦贡献：购物车FSM测试](#9-邱宇谦贡献购物车fsm测试)
 
 ---
 
@@ -607,6 +608,48 @@ submitForApproval逻辑未强制守卫条件
 本作业成功展示了有限状态机建模在系统功能测试中的威力。通过在作业1价格验证工作的基础上构建，我们创建了覆盖完整产品生命周期的综合测试套件。发现的5个缺陷突显了FSM测试在捕获简单单元测试可能遗漏的状态相关缺陷方面的重要性。
 
 FSM方法对于电商系统特别有价值，其中产品、订单和购物车具有复杂的生命周期，业务规则严格管控状态转换。
+
+---
+
+## 9. 邱宇谦贡献：购物车FSM测试
+
+> **贡献者**：邱宇谦（Yuqian Chiu）
+
+### 9.1 简介（Task 1）
+
+有限状态机（FSM）对测试有用，因为它将系统行为抽象为有限状态与显式转换，从而可以系统性地覆盖状态/转换并验证非法操作。
+（由邱宇谦提供：请在此处替换为其最终理论文字。）
+
+### 9.2 特性选择（Task 2）
+
+**选择特性**：Shopping Cart（购物车）组件。
+
+购物车具有清晰的生命周期，会在用户操作下在**EMPTY、ACTIVE、OBSOLETE**等状态之间转换，因此适合用FSM建模。其“非平凡性”体现在：
+- 在EMPTY状态下不能更新商品数量。
+- 在ACTIVE状态下删除最后一件商品会触发回到EMPTY。
+- 删除购物车会进入OBSOLETE，之后不允许任何操作。
+
+### 9.3 功能模型（Task 3）
+
+**状态与转换**：
+- Add Item：EMPTY → ACTIVE
+- Update Quantity：ACTIVE → ACTIVE（自环）
+- Remove Item（移除最后一件）：ACTIVE → EMPTY
+- Delete Cart：ANY → OBSOLETE
+
+**插图**：请插入购物车FSM状态图（EMPTY/ACTIVE/OBSOLETE）。
+
+### 9.4 测试实现（Task 4）
+
+**测试类**：`MyCartStateTest.java`。
+
+**测试策略**：为确保100%转换覆盖，设计两个场景：
+1. **标准生命周期（testShoppingCartFSM）**：EMPTY → ACTIVE（addItem）→ ACTIVE（updateQty）→ EMPTY（removeItem）→ OBSOLETE（deleteCart）
+2. **强制删除（Force Deletion）**：ACTIVE → OBSOLETE（deleteCart）
+
+**代码与执行结果**：
+- 请粘贴MyCartStateTest.java中上述两条路径的关键测试代码。
+- 请附上JUnit执行结果截图或控制台输出。
 
 ---
 

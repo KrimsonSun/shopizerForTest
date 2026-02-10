@@ -56,6 +56,7 @@ def create_assignment2_report():
         '6. Test Execution Results',
         '7. Defects and Issues Found',
         '8. Conclusions',
+        '9. Team Contribution: Shopping Cart FSM (Yuqian Chiu)',
     ]
     
     for item in toc_items:
@@ -336,6 +337,62 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
     
     doc.add_page_break()
     
+    # Section 9: Team Contribution (Yuqian Chiu)
+    doc.add_heading('9. Team Contribution: Shopping Cart FSM (Yuqian Chiu)', level=1)
+
+    doc.add_heading('9.1 Overview', level=2)
+    doc.add_paragraph(
+        'This section documents the FSM testing work completed by team member Yuqian Chiu. '
+        'Building on the same FSM principles described in Section 2, Yuqian applied the FSM '
+        'methodology to test the Shopping Cart component, ensuring complete independence from '
+        'the Product Lifecycle testing covered in previous sections.'
+    )
+
+    doc.add_heading('9.2 Feature Selection (Task 2)', level=2)
+    doc.add_paragraph(
+        'Feature selected: Shopping Cart component. The cart transitions through distinct states '
+        '(EMPTY, ACTIVE, OBSOLETE) based on user actions. The model is non-trivial because the '
+        'validity of user actions depends on the current state (e.g., updating quantity in EMPTY is invalid, '
+        'removing the last item from ACTIVE returns to EMPTY, deleting a cart moves it to OBSOLETE).'
+    )
+
+    doc.add_heading('9.3 Functional Model (Task 3)', level=2)
+    doc.add_paragraph('State Diagram and Transitions:')
+    doc.add_paragraph('• Add Item: EMPTY → ACTIVE')
+    doc.add_paragraph('• Update Quantity: ACTIVE → ACTIVE (self-loop)')
+    doc.add_paragraph('• Remove Item (last item): ACTIVE → EMPTY')
+    doc.add_paragraph('• Delete Cart: ANY → OBSOLETE')
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    p.add_run('📷 SCREENSHOT 13: ').bold = True
+    run = p.add_run('[INSERT: Shopping Cart FSM state diagram with EMPTY/ACTIVE/OBSOLETE]')
+    run.italic = True
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
+    doc.add_heading('9.4 Test Implementation (Task 4)', level=2)
+    doc.add_paragraph(
+        'Test implementation in MyCartStateTest.java. Strategy ensures 100% transition coverage '
+        'via two scenarios: (1) Standard lifecycle (EMPTY → ACTIVE → ACTIVE → EMPTY → OBSOLETE) '
+        'and (2) Force deletion (ACTIVE → OBSOLETE).'
+    )
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    p.add_run('📷 SCREENSHOT 14: ').bold = True
+    run = p.add_run('[INSERT: MyCartStateTest.java code for both scenarios]')
+    run.italic = True
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    p.add_run('📷 SCREENSHOT 15: ').bold = True
+    run = p.add_run('[INSERT: JUnit execution result for MyCartStateTest.java]')
+    run.italic = True
+    run.font.color.rgb = RGBColor(255, 0, 0)
+
+    doc.add_page_break()
+
     # Appendix
     doc.add_heading('Appendix: Test Execution Log', level=1)
     
@@ -374,7 +431,7 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
     print(f'✅ Document created: {output_path}')
     print('\\n📸 Screenshot Insertion Guide:')
     print('=' * 60)
-    print('Total screenshots needed: 12\\n')
+    print('Total screenshots needed: 15\\n')
     
     screenshots = [
         ('1', 'Section 1', 'Overview: Assignment 1 + Assignment 2 integration diagram'),
@@ -389,6 +446,9 @@ Total: 39 test cases (19 from Assignment 1 + 20 from Assignment 2)"""
         ('10', 'Section 7', 'Console warnings for bugs found'),
         ('11', 'Section 8', 'Integration diagram (Assignment 1 → 2)'),
         ('12', 'Appendix', 'Complete test execution log'),
+        ('13', 'Section 9.3', 'Shopping Cart FSM state diagram (EMPTY/ACTIVE/OBSOLETE)'),
+        ('14', 'Section 9.4', 'MyCartStateTest.java code for both scenarios'),
+        ('15', 'Section 9.4', 'JUnit execution result for MyCartStateTest.java'),
     ]
     
     for num, section, description in screenshots:
