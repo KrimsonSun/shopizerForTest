@@ -457,4 +457,30 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Product product2 = createProductWithPrice(priceAfterTransition);
 		Assert.assertNotNull("Price at/above transition should be valid", product2);
 	}
+
+	// ========== SERVICE LAYER TESTS FOR COVERAGE ==========
+	/**
+	 * Test ProductPriceService methods: saveOrUpdate, findByProductSku
+	 * These tests directly cover the service implementation
+	 */
+	@Test
+	public void testProductPriceService_SaveAndFind() throws Exception {
+		// Create a product with price
+		BigDecimal testPrice = new BigDecimal("159.99");
+		Product product = createProductWithPrice(testPrice);
+		
+		// Test findByProductSku
+		List<ProductPrice> prices = productPriceService.findByProductSku(product.getSku(), 
+			merchantService.getByCode(MerchantStore.DEFAULT_STORE));
+		Assert.assertNotNull("Should find prices by SKU", prices);
+		Assert.assertTrue("Should have at least one price", prices.size() > 0);
+		
+		// Test saveOrUpdate
+		ProductPrice price = prices.get(0);
+		price.setProductPriceAmount(new BigDecimal("169.99"));
+		ProductPrice updated = productPriceService.saveOrUpdate(price);
+		Assert.assertNotNull("Updated price should not be null", updated);
+		Assert.assertEquals("Price should be updated", 0, 
+			new BigDecimal("169.99").compareTo(updated.getProductPriceAmount()));
+	}
 }
