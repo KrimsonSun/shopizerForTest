@@ -17,14 +17,15 @@ Before adding new test cases, the existing test suite for com.salesmanager.core.
 
 | Coverage Type | Metrics | Description |
 |---|---|---|
-| Line Coverage | 42.9% (6/14 lines) | Only basic price creation tested, service layer methods not covered |
-| Method Coverage | 42.9% (3/7 methods) | saveOrUpdate, findByProductSku partially covered |
+| Line Coverage | 38% (8/21 lines) | Service layer methods partially untested, critical paths missing |
+| Method Coverage | 42.9% (3/7 methods) | Only 3 of 7 service methods covered by partition tests |
 | Branch Coverage | 0% | No branch coverage for service business logic |
-| Instruction Coverage | 38.6% (22/57 instructions) | Limited instruction execution paths tested |
+| Instruction Coverage | 38% (22/57 instructions) | Limited instruction execution paths tested |
 
 **Key Uncovered Methods:**
 - `addDescription()` - Add price description functionality
 - `delete()` - Delete price operation with error handling
+- `findById()` - Direct ID-based price lookup
 - `findByInventoryId()` - Query prices by inventory ID
 
 📷 **[INSERT SCREENSHOT 1 HERE: JaCoCo baseline coverage report showing ProductPriceServiceImpl with 42.9% line coverage]**
