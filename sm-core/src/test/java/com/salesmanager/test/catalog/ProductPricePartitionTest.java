@@ -483,4 +483,40 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 		Assert.assertEquals("Price should be updated", 0, 
 			new BigDecimal("169.99").compareTo(updated.getProductPriceAmount()));
 	}
+
+	/**
+	 * Test ProductPriceService methods: findById, delete, findByInventoryId
+	 * These methods were not covered by partition tests, now added to improve coverage
+	 */
+	@Test
+	public void testProductPriceService_AdditionalMethods() throws Exception {
+		// Create a product with price and inventory
+		BigDecimal testPrice = new BigDecimal("249.99");
+		Product product = createProductWithPrice(testPrice);
+		MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
+		String sku = product.getSku();
+		
+		// Test findById
+		List<ProductPrice> prices = productPriceService.findByProductSku(sku, store);
+		Assert.assertNotNull("Should find prices", prices);
+		Assert.assertTrue("Should have at least one price", prices.size() > 0);
+		ProductPrice price = prices.get(0);
+		Long priceId = price.getId();
+		
+		ProductPrice foundPrice = productPriceService.findById(priceId, sku, store);
+		Assert.assertNotNull("Should find price by ID", foundPrice);
+		Assert.assertEquals("Price ID should match", priceId.longValue(), foundPrice.getId().longValue());
+		
+		// Test findByInventoryId  
+		ProductAvailability availability = product.getAvailabilities().iterator().next();
+		List<ProductPrice> pricesByInventory = productPriceService.findByInventoryId(
+			availability.getId(), sku, store);
+		Assert.assertNotNull("Should find prices by inventory ID", pricesByInventory);
+		Assert.assertTrue("Should find at least one price by inventory", pricesByInventory.size() > 0);
+		
+		// Test delete
+		productPriceService.delete(price);
+		ProductPrice deletedPrice = productPriceService.findById(priceId, sku, store);
+		Assert.assertNull("Deleted price should not be found", deletedPrice);
+	}
 }
