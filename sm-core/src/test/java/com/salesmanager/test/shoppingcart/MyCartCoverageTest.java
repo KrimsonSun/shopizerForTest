@@ -119,7 +119,7 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
 
     @Test
     public void testMergeGuestAndCustomerCarts() throws Exception {
-        System.out.println("=== 測試場景：合併未登入與登入後的購物車 ===");
+        System.out.println("=== Test Scenario: Merging guest cart with customer cart after login ===");
 
         Long customerId = 999L;
 
@@ -163,7 +163,7 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
 
     @Test
     public void testCartWithDeletedProduct() throws Exception {
-        System.out.println("=== 測試場景：購物車裡的商品突然被刪除了 (Orphaned Item) ===");
+        System.out.println("=== Test Scenario: Product in cart becomes unavailable (or removed) ===");
 
         ShoppingCart cart = new ShoppingCart();
         cart.setMerchantStore(store);
@@ -195,7 +195,7 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
     }
     @Test
     public void testGetEmptyCartIsDeletedOrNull() throws Exception {
-        System.out.println("=== 測試場景：讀取一個空購物車 (驗證系統回收機制) ===");
+        System.out.println("=== Test Scenario: Loading an empty cart (verifying system cleanup mechanism)\n ===");
 
         // 1. 創一個「只有殼」的購物車
         ShoppingCart emptyCart = new ShoppingCart();
@@ -210,25 +210,25 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
         // 原本是 Assert.assertNotNull (強制不能是空，不然就報紅字)
         // 現在改成 if (loadedCart == null) (如果是空，印一行字就好，不報錯)
         if (loadedCart == null) {
-            System.out.println(" 空購物車已被系統自動刪除 (System cleanup worked)");
+            System.out.println(" Empty cart was automatically removed by the system (cleanup verified)");
         } else {
             // 如果沒被刪，檢查是不是廢棄狀態
-            Assert.assertTrue("空購物車應該被標記為 Obsolete", loadedCart.isObsolete());
-            System.out.println(" 空購物車已被標記為 Obsolete");
+            Assert.assertTrue("Empty cart should be marked as obsolete", loadedCart.isObsolete());
+            System.out.println(" Empty cart should be marked as obsolete");
         }
 
         System.out.println(" Empty Cart Test Passed");
     }
     @Test
     public void testFinalCoverageBoost() throws Exception {
-        System.out.println("=== 測試場景：終極補分 (刪除 + 會員空查) ===");
+        System.out.println("=== Test Scenario: Additional coverage validation (delete operation and empty customer lookup) ===");
 
         // 1. 補回 getShoppingCart(Customer) 的 return null 分數
         // 這是你之前掉分的關鍵！
         Customer freshCustomer = new Customer();
         freshCustomer.setId(System.currentTimeMillis()); // 用時間當 ID 確保不重複
         ShoppingCart nullCart = shoppingCartService.getShoppingCart(freshCustomer, store);
-        Assert.assertNull("新會員不應該有購物車", nullCart);
+        Assert.assertNull("New customer should not have an existing shopping cart", nullCart);
 
         // 2. 補回 deleteShoppingCartItem 的分數
         // 隨便刪一個不存在的 ID
@@ -236,7 +236,7 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
 
         // 3. 測試 getById 找不到的情況 (這也會加 3-5 行)
         ShoppingCart nullCartById = shoppingCartService.getById(999999L, store);
-        Assert.assertNull("不存在的 ID 應該回傳 null", nullCartById);
+        Assert.assertNull("Non-existing cart ID should return null", nullCartById);
 
         System.out.println("✅ Final Coverage Boost Completed!");
     }
