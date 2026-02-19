@@ -490,33 +490,60 @@ public class ProductPricePartitionTest extends com.salesmanager.test.common.Abst
 	 */
 	@Test
 	public void testProductPriceService_AdditionalMethods() throws Exception {
-		// Create a product with price and inventory
+		// 1) Create baseline data
 		BigDecimal testPrice = new BigDecimal("249.99");
 		Product product = createProductWithPrice(testPrice);
 		MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
 		String sku = product.getSku();
-		
-		// Test findById
+
+		Assert.assertNotNull("Product should be created", product);
+		Assert.assertNotNull("Store should be loaded", store);
+		Assert.assertNotNull("SKU should not be null", sku);
+
+		// 2) Find prices by SKU and validate baseline
 		List<ProductPrice> prices = productPriceService.findByProductSku(sku, store);
 		Assert.assertNotNull("Should find prices", prices);
 		Assert.assertTrue("Should have at least one price", prices.size() > 0);
+
 		ProductPrice price = prices.get(0);
+		Assert.assertNotNull("First price should not be null", price);
+		Assert.assertNotNull("Price id should be generated", price.getId());
+		Assert.assertNotNull("Price amount should not be null", price.getProductPriceAmount());
+		Assert.assertEquals("Baseline amount should match", 0,
+			testPrice.compareTo(price.getProductPriceAmount()));
+
+		// 3) Find by ID and validate identity + value consistency
 		Long priceId = price.getId();
-		
 		ProductPrice foundPrice = productPriceService.findById(priceId, sku, store);
 		Assert.assertNotNull("Should find price by ID", foundPrice);
 		Assert.assertEquals("Price ID should match", priceId.longValue(), foundPrice.getId().longValue());
-		
-		// Test findByInventoryId  
+		Assert.assertEquals("Found amount should match", 0,
+			testPrice.compareTo(foundPrice.getProductPriceAmount()));
+
+		// 4) Find by inventory and check relationship correctness
+		Assert.assertNotNull("Availabilities should not be null", product.getAvailabilities());
+		Assert.assertTrue("Product should contain availabilities", !product.getAvailabilities().isEmpty());
+
 		ProductAvailability availability = product.getAvailabilities().iterator().next();
+		Assert.assertNotNull("Availability should not be null", availability);
+		Assert.assertNotNull("Availability id should not be null", availability.getId());
+
 		List<ProductPrice> pricesByInventory = productPriceService.findByInventoryId(
 			availability.getId(), sku, store);
 		Assert.assertNotNull("Should find prices by inventory ID", pricesByInventory);
-		Assert.assertTrue("Should find at least one price by inventory", pricesByInventory.size() > 0);
-		
-		// Test delete
+		Assert.assertTrue("Should find at least one price by inventory", !pricesByInventory.isEmpty());
+		Assert.assertTrue("Inventory query should contain target price",
+			pricesByInventory.stream().anyMatch(p -> p.getId().longValue() == priceId.longValue()));
+
+		// 5) Delete and verify through multiple query paths
 		productPriceService.delete(price);
+
 		ProductPrice deletedPrice = productPriceService.findById(priceId, sku, store);
-		Assert.assertNull("Deleted price should not be found", deletedPrice);
+		Assert.assertNull("Deleted price should not be found by ID", deletedPrice);
+
+		List<ProductPrice> pricesAfterDelete = productPriceService.findByProductSku(sku, store);
+		Assert.assertNotNull("Price list after delete should not be null", pricesAfterDelete);
+		Assert.assertFalse("Deleted ID should not exist in sku query",
+			pricesAfterDelete.stream().anyMatch(p -> p.getId().longValue() == priceId.longValue()));
 	}
 }
