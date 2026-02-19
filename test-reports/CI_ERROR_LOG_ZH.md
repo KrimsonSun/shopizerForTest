@@ -96,6 +96,12 @@
 - **修复**：将命令改为 `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest test`，使用 `-am` 自动构建依赖模块。
 - **提交建议**：提交该修复后重新触发 Actions，并截图保留“失败一次 + 修复后通过”的证据。
 
+### 步骤 11：GitHub Actions 二次失败（No tests were executed）
+- **现象**：CI 报错 `Failed to execute goal ... maven-surefire-plugin ... on project sm-core-model: No tests were executed!`
+- **根因**：使用 `-am` 后会进入 `sm-core-model` 等依赖模块；但 `-Dtest=DataUtilsTest` 仅在 `sm-core` 有匹配测试，其他模块无匹配时 surefire 按默认策略失败。
+- **修复**：将命令改为 `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest -DfailIfNoTests=false test`。
+- **本地验证**：Reactor Summary 显示 `shopizer / sm-core-model / sm-core-modules / sm-core` 全部 `SUCCESS`，并且 `DataUtilsTest` 执行结果为 `Tests run: 9, Failures: 0, Errors: 0, Skipped: 0`。
+
 ---
 
 ## 作业提交时可引用的“问题说明”模板

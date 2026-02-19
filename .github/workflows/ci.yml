@@ -24,4 +24,4 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build and run targeted tests (sm-core)
-        run: ./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest test
+        run: ./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest -DfailIfNoTests=false test

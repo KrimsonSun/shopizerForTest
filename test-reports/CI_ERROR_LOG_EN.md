@@ -96,6 +96,12 @@
 - **Fix**: update command to `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest test` so Maven also builds required modules (`-am`).
 - **Submission note**: commit this fix and re-run Actions, then capture screenshots for both “failed run” and “fixed successful run”.
 
+### Step 11: Second GitHub Actions failure (No tests were executed)
+- **Symptom**: CI failed with `Failed to execute goal ... maven-surefire-plugin ... on project sm-core-model: No tests were executed!`
+- **Root cause**: after adding `-am`, Maven enters dependency modules such as `sm-core-model`; with `-Dtest=DataUtilsTest`, only `sm-core` has matching tests, while other modules have no matching tests and surefire fails by default.
+- **Fix**: update command to `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest -DfailIfNoTests=false test`.
+- **Local validation**: Reactor Summary shows `shopizer / sm-core-model / sm-core-modules / sm-core` all `SUCCESS`, and `DataUtilsTest` reports `Tests run: 9, Failures: 0, Errors: 0, Skipped: 0`.
+
 ---
 
 ## Assignment-ready Issue Description Template
