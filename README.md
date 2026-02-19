@@ -29,9 +29,8 @@ Shopizer Headless commerce consists of the following components:
 Access the headless api: http://localhost:8080/swagger-ui.html
 
 
-See the demo: [**New demo on the way 2025]
+See the demo: 
 -------------------
-Headless demo Available soon
 
 1.  Run from Docker images:
 
