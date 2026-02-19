@@ -90,6 +90,12 @@
 - **Core flow**: `checkout` + `setup-java(17)` + `./mvnw -B -pl sm-core -Dtest=DataUtilsTest test`
 - **Status**: created and ready to run after push.
 
+### Step 10: First GitHub Actions web run failed (dependency resolution)
+- **Symptom**: CI log shows `Could not resolve dependencies ... com.shopizer:sm-core-model ... from/to spring-releases ... Not authorized`
+- **Root cause**: workflow built only `sm-core` and did not build required local dependency modules in the same reactor; Maven then tried remote resolution for `sm-core-model` and hit authorization failure.
+- **Fix**: update command to `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest test` so Maven also builds required modules (`-am`).
+- **Submission note**: commit this fix and re-run Actions, then capture screenshots for both “failed run” and “fixed successful run”.
+
 ---
 
 ## Assignment-ready Issue Description Template

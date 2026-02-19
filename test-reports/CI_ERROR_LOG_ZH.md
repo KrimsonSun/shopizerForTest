@@ -90,6 +90,12 @@
 - **关键行为**：`checkout` + `setup-java(17)` + `./mvnw -B -pl sm-core -Dtest=DataUtilsTest test`
 - **状态**：已创建，可提交后触发 GitHub Actions。
 
+### 步骤 10：GitHub Actions 首次 web 运行失败（依赖解析）
+- **现象**：CI 日志报错 `Could not resolve dependencies ... com.shopizer:sm-core-model ... from/to spring-releases ... Not authorized`
+- **根因**：workflow 只构建了 `sm-core`，未在同一 reactor 中先构建其本地依赖模块，Maven 转而访问远程仓库拉取 `sm-core-model`，被仓库权限拒绝。
+- **修复**：将命令改为 `./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest test`，使用 `-am` 自动构建依赖模块。
+- **提交建议**：提交该修复后重新触发 Actions，并截图保留“失败一次 + 修复后通过”的证据。
+
 ---
 
 ## 作业提交时可引用的“问题说明”模板
