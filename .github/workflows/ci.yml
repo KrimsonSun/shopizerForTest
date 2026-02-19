@@ -24,4 +24,5 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build and run targeted tests (sm-core)
+        # Includes -DfailIfNoTests=false to skip modules with no matching tests
         run: ./mvnw -B -pl sm-core -am -Dtest=DataUtilsTest -DfailIfNoTests=false test
