@@ -18,5 +18,5 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run My Shopping Cart Tests # 這裡就是你的重頭戲
+      - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
