@@ -1,0 +1,25 @@
+name: Shopizer CI Workflow
+
+on:
+  push:
+    branches: [ "master", "main" ] # 當你上傳到這兩個分支時觸發
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # 使用雲端 Linux 電腦
+
+    steps:
+      - uses: actions/checkout@v3 # 下載你的程式碼
+
+      - name: Set up JDK 17 # 設定跟你電腦一樣的 Java 環境
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run All Tests with Maven
+        # 這行是關鍵！它會跑完你寫的所有測試，包括那個 125 行的 MyCartCoverageTest
+        run: mvn clean test
