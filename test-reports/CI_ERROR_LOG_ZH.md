@@ -111,7 +111,72 @@
 - **解决方案**：已尝试操作 + 最终修复方案
 - **结果**：已解决 / 暂未解决（附后续计划）
 
-## 待补充（你后续执行时继续追加）
-- GitHub Actions workflow 触发截图
-- CI 页面中的 `build`、`test` job 日志截图
-- 修复后重新运行并通过的截图
+## 截图与证据
+
+### 图 1：CI 运行成功总览
+**图注**：GitHub Actions CI 运行最终状态，显示"Success"标记、执行耗时和最新提交信息。
+
+**说明**：此截图证明 Shopizer 项目成功通过 CI 流程。本次运行由提交"Add comment to workflow for clarity"触发，耗时约 3–5 分钟。绿色的勾号表示所有作业均无错误地完成。
+
+**位置**：GitHub 仓库 → Actions 标签页 → 最新的 run（绿色勾号）→ 点击进入 → 滚至顶部
+
+**插入位置**：错误时间线步骤 11 之后。
+
+---
+
+### 图 2：Build 作业执行步骤
+**图注**：`build-test` 作业的详细步骤列表，展示所有执行阶段：检出代码、安装 JDK 17、Maven 执行权限、测试执行。
+
+**说明**：此图展示完整的 workflow 执行过程。每个步骤（绿色勾号）表示成功完成。关键步骤包括：
+- Checkout source code（检出源码）
+- Set up JDK 17（配置 JDK）
+- Make Maven wrapper executable（设置 Maven 执行权限）
+- Build and run targeted tests (sm-core)（构建并运行目标测试）
+
+**位置**：同一 run 页面 → 向下滚动至"Jobs"部分 → 点击`build-test` → 查看左侧"Run steps"面板
+
+**插入位置**：图 1 之后。
+
+---
+
+### 图 3：测试执行日志（成功）
+**图注**：Maven 测试执行输出，显示成功结果："Tests run: 9, Failures: 0, Errors: 0, Skipped: 0"与"BUILD SUCCESS"。
+
+**说明**：这是测试确实被执行且通过的关键证据。日志显示：
+- `[INFO] Running com.salesmanager.test.business.utils.DataUtilsTest`
+- `[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0`
+- `[INFO] BUILD SUCCESS` 及执行耗时
+- Reactor Summary 确认所有模块均通过
+
+**位置**：run 页面内 → 点击`build-test` 作业 → 滚至底部日志区域，或在日志中搜索"Tests run:"
+
+**插入位置**：图 2 之后（这是最重要的证明）。
+
+---
+
+### 图 4：失败运行 - 依赖解析错误
+**图注**：首次 CI 运行失败，显示应用修复前 `sm-core-model` 项目的"No tests were executed!"错误。
+
+**说明**：此截图捕捉了添加 `-DfailIfNoTests=false` 参数前的失败状态。错误信息为：
+- `Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin ... on project sm-core-model: No tests were executed!`
+- `(Set -DfailIfNoTests=false to ignore this error.)`
+
+这演示了问题解决过程和 CI 配置的迭代性质。
+
+**位置**：GitHub 仓库 → Actions 标签页 → 找到标记为"Fix CI no-tests failure..."的运行（红色 X 标记）→ 查看其错误日志
+
+**插入位置**：图 3 后的新小节"问题与修复过程"中。
+
+---
+
+### 图 5：修复后成功重新运行
+**图注**：使用修复后工作流（包含 `-DfailIfNoTests=false` 参数）的最新成功 CI 运行（绿色勾号）。
+
+**说明**：此截图显示应用配置修复后相同测试套件干净地通过。与图 4 对比可演示问题解决的有效性。从红转绿的转变证明：
+- 根本原因被正确定位（无测试的模块导致 surefire 失败）
+- 修复（添加 `-DfailIfNoTests=false`）有效
+- CI 流程现在可靠地在每次推送时运行
+
+**位置**：GitHub 仓库 → Actions 标签页 → 绿色勾号的最新运行 → 与图 1 相同页面，但关注日期/提交消息以确认为修复提交
+
+**插入位置**：在"问题与修复过程"小节中与图 4 并列。

@@ -111,7 +111,72 @@
 - **Resolution attempts**: what was tried and why
 - **Outcome**: resolved / unresolved (with next plan)
 
-## To Be Added in Next Runs
-- GitHub Actions workflow trigger screenshots
-- CI `build` and `test` job log screenshots
-- Re-run screenshots after fixes showing successful pipeline
+## Screenshots & Evidence
+
+### Figure 1: Successful CI Run Overview
+**Caption**: GitHub Actions CI run final status showing "Success" with execution duration and latest commit information.
+
+**Description**: This screenshot demonstrates that the Shopizer project successfully passed the CI pipeline. The run was triggered by commit "Add comment to workflow for clarity" and completed in approximately 3–5 minutes. The green checkmark indicates all jobs executed without errors.
+
+**Location**: GitHub repository → Actions tab → Latest run (with green checkmark) → Click on it → Scroll to top
+
+**Insertion Location**: Place after Step 11 in the error timeline.
+
+---
+
+### Figure 2: Build Job Execution Steps
+**Caption**: Detailed step list of the `build-test` job showing all executed stages: Checkout, Install JDK 17, Maven executable permission, and test execution.
+
+**Description**: This figure shows the complete workflow execution stages. Each step (green checkmark) indicates successful completion. Key steps include:
+- Checkout source code
+- Set up JDK 17
+- Make Maven wrapper executable
+- Build and run targeted tests (sm-core)
+
+**Location**: Within the same run page → Scroll down to "Jobs" section → Click `build-test` → View "Run steps" at left panel
+
+**Insertion Location**: After Figure 1.
+
+---
+
+### Figure 3: Test Execution Log (Success)
+**Caption**: Maven test execution output showing successful test results: "Tests run: 9, Failures: 0, Errors: 0, Skipped: 0" and "BUILD SUCCESS".
+
+**Description**: This is the critical evidence that tests were actually executed and passed. The log shows:
+- `[INFO] Running com.salesmanager.test.business.utils.DataUtilsTest`
+- `[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0`
+- `[INFO] BUILD SUCCESS` with execution time
+- Reactor Summary confirming all modules passed
+
+**Location**: Within the run page → Click `build-test` job → Scroll to bottom section or search for "Tests run:" in the logs
+
+**Insertion Location**: After Figure 2 (this is the most important proof).
+
+---
+
+### Figure 4: Failed Run - Dependency Resolution Error
+**Caption**: First CI run failure showing "No tests were executed!" error on project `sm-core-model` before applying the fix.
+
+**Description**: This screenshot captures the initial failure state before the `-DfailIfNoTests=false` parameter was added. The error message reads:
+- `Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin ... on project sm-core-model: No tests were executed!`
+- `(Set -DfailIfNoTests=false to ignore this error.)`
+
+This demonstrates the problem-solving process and the iterative nature of CI configuration.
+
+**Location**: GitHub repository → Actions tab → Find the run labeled "Fix CI no-tests failure..." (red X mark) → View its error logs
+
+**Insertion Location**: In a new subsection titled "Problem & Resolution Timeline" after Figure 3.
+
+---
+
+### Figure 5: Successful Re-run After Fix
+**Caption**: Latest successful CI run (green checkmark) using the fixed workflow with `-DfailIfNoTests=false` parameter.
+
+**Description**: This screenshot shows the same test suite passing cleanly after the configuration fix. Compare this with Figure 4 to demonstrate problem-solving effectiveness. The red-to-green transition proves that:
+- The root cause was correctly identified (modules without tests causing surefire failure)
+- The fix (adding `-DfailIfNoTests=false`) was effective
+- CI pipeline now runs reliably on every push
+
+**Location**: GitHub repository → Actions tab → The latest run with green checkmark → Same as Figure 1 but focus on the date/commit message to confirm it's the fix commit
+
+**Insertion Location**: In the "Problem & Resolution Timeline" subsection alongside Figure 4.
