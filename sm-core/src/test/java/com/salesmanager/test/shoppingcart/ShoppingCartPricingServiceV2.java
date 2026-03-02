@@ -13,6 +13,7 @@ public class ShoppingCartPricingServiceV2 {
 
     // dummy but testable: cart uses PricingService to compute line total
     public BigDecimal computeLineTotal(BigDecimal unitPrice, int qty) {
+        if (qty <= 0) return BigDecimal.ZERO;
         return pricingService.calculatePriceQuantity(unitPrice, qty);
     }
 }

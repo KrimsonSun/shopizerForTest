@@ -1,6 +1,6 @@
 package com.salesmanager.test.shoppingcart;
 
-import com.salesmanager.core.model.common.UserContext;
+
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 import org.junit.Test;
 import org.mockito.Mockito;

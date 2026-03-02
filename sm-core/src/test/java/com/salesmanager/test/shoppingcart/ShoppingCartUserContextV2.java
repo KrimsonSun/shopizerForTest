@@ -1,6 +1,6 @@
 package com.salesmanager.test.shoppingcart;
 
-import com.salesmanager.core.model.common.UserContext;
+
 import com.salesmanager.core.model.shoppingcart.ShoppingCart;
 
 public class ShoppingCartUserContextV2 {
