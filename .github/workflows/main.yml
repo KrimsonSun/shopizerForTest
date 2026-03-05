@@ -20,6 +20,8 @@ jobs:
 
       - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
+        - name: Run PMD Analysis
+        run: ./mvnw pmd:check -Dpmd.failOnViolation=false
 
   analyze:
     name: Analyze Code Quality
