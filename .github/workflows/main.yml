@@ -1,8 +1,8 @@
-name: Yu-Chien Shopping Cart CI  # 改成你的名字，一眼就能認出來
+name: Yu-Chien Shopping Cart CI  
 
 on:
   push:
-    branches: [ "master", "main", "3.2.7" ] # 務必加上 3.2.7，這樣它才會動
+    branches: [ "master", "main", "3.2.7" ] 
   pull_request:
     branches: [ "master", "main", "3.2.7" ]
 
@@ -20,3 +20,26 @@ jobs:
 
       - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
+
+  analyze:
+    name: Analyze Code Quality
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: java
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
