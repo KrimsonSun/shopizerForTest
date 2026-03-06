@@ -65,6 +65,7 @@ docker run \
 API documentation:
 -------------------
 
+4. Run the coverage
 
 Get the source code:
 -------------------
