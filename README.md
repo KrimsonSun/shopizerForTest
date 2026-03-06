@@ -66,6 +66,9 @@ API documentation:
 -------------------
 
 4. Run the coverage
+```bash
+	./mvnw clean jacoco:prepare-agent test jacoco:report -pl sm-core -Dtest=ProductPricePartitionTest,MyCartCoverageTest
+```
 
 Get the source code:
 -------------------
