@@ -95,7 +95,13 @@ Form compiling and running Shopizer admin consult the repo README file
 
 Form compiling and running Shopizer admin consult the repo README file
 
+4. Test Coverage
+```bash
 
+	./mvnw clean jacoco:prepare-agent test jacoco:report -pl sm-core -Dtest=ProductPricePartitionTest,MyCartCoverageTest
+```
+
+Form compiling and running Shopizer admin consult the repo README file
 ### Access the application:
 -------------------
 
