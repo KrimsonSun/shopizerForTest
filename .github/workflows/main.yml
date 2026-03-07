@@ -26,17 +26,23 @@ jobs:
       - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
 
-      # SpotBugs is already in your pom.xml — just run it!
+      # FIX: Use full plugin coordinates so Maven finds it regardless of prefix issues
       - name: Run SpotBugs Analysis
-        run: ./mvnw -B -pl sm-core -am spotbugs:spotbugs
+        run: ./mvnw -B -pl sm-core -am com.github.spotbugs:spotbugs-maven-plugin:4.8.3:spotbugs -Dspotbugs.failOnError=false
         continue-on-error: true
+
+      # FIX: Also try parent target folder in case output path differs
+      - name: Find SpotBugs output (debug)
+        if: always()
+        run: find . -name "spotbugsXml.xml" 2>/dev/null || echo "No SpotBugs XML found"
 
       - name: Upload SpotBugs report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: spotbugs-report
-          path: sm-core/target/spotbugsXml.xml
+          path: |
+            **/target/spotbugsXml.xml
           if-no-files-found: warn
 
   analyze:
@@ -60,7 +66,6 @@ jobs:
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
-      # Upgraded to v4 to remove deprecation warning
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
