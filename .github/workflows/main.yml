@@ -26,12 +26,25 @@ jobs:
       - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
 
-      # FIX: Use full plugin coordinates so Maven finds it regardless of prefix issues
+      # Create a minimal Maven settings that only uses Maven Central (no spring-releases)
+      - name: Create Maven settings for SpotBugs
+        run: |
+          cat > /tmp/spotbugs-settings.xml << 'SETTINGS'
+          <settings>
+            <mirrors>
+              <mirror>
+                <id>central-only</id>
+                <mirrorOf>*</mirrorOf>
+                <url>https://repo.maven.apache.org/maven2</url>
+              </mirror>
+            </mirrors>
+          </settings>
+          SETTINGS
+
       - name: Run SpotBugs Analysis
-        run: ./mvnw -B -pl sm-core -am com.github.spotbugs:spotbugs-maven-plugin:4.8.3:spotbugs -Dspotbugs.failOnError=false
+        run: ./mvnw -B -pl sm-core -am -s /tmp/spotbugs-settings.xml com.github.spotbugs:spotbugs-maven-plugin:4.8.3:spotbugs -Dspotbugs.failOnError=false
         continue-on-error: true
 
-      # FIX: Also try parent target folder in case output path differs
       - name: Find SpotBugs output (debug)
         if: always()
         run: find . -name "spotbugsXml.xml" 2>/dev/null || echo "No SpotBugs XML found"
@@ -41,8 +54,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: spotbugs-report
-          path: |
-            **/target/spotbugsXml.xml
+          path: "**/target/spotbugsXml.xml"
           if-no-files-found: warn
 
   analyze:
