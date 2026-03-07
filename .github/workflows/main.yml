@@ -20,25 +20,24 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # FIX: Make mvnw executable (prevents "permission denied" exit code 1)
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
       - name: Run My Shopping Cart Tests
         run: ./mvnw -B -pl sm-core -am -Dtest=MyCartCoverageTest -DfailIfNoTests=false test
 
-      # FIX: Use pmd:pmd to generate the HTML site report, THEN pmd:check to check violations
-      - name: Run PMD Analysis
-        run: ./mvnw -B -pl sm-core -am pmd:pmd pmd:check -Dpmd.failOnViolation=false
+      # SpotBugs is already in your pom.xml — just run it!
+      - name: Run SpotBugs Analysis
+        run: ./mvnw -B -pl sm-core -am spotbugs:spotbugs
+        continue-on-error: true
 
-      - name: Upload PMD reports
+      - name: Upload SpotBugs report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pmd-report
-          path: |
-            **/target/site/pmd.html
-            **/target/pmd.xml
+          name: spotbugs-report
+          path: sm-core/target/spotbugsXml.xml
+          if-no-files-found: warn
 
   analyze:
     name: Analyze Code Quality (CodeQL)
@@ -58,21 +57,19 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # FIX: Make mvnw executable here too
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
+      # Upgraded to v4 to remove deprecation warning
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: java
-          # FIX: Explicitly set build-mode to stop the "undefined" warning
-          build-mode: none
 
-      - name: Build (skip tests) for CodeQL
+      - name: Build for CodeQL
         run: ./mvnw -B -DskipTests package
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:java"
