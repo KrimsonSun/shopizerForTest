@@ -234,7 +234,7 @@ public class MyCartCoverageTest extends AbstractSalesManagerCoreTestCase {
         // 隨便刪一個不存在的 ID
         shoppingCartService.deleteShoppingCartItem(12345678L);
 
-        // 3. 測試 getById 找不到的情況 (這也會加 3-5 行)
+        // 3. 測試 getById 找不到的情況
         ShoppingCart nullCartById = shoppingCartService.getById(999999L, store);
         Assert.assertNull("Non-existing cart ID should return null", nullCartById);
 

@@ -1,8 +1,8 @@
-name: Yu-Chien Shopping Cart CI  # 改成你的名字，一眼就能認出來
+name: Yu-Chien Shopping Cart CI
 
 on:
   push:
-    branches: [ "master", "main", "3.2.7" ] # 務必加上 3.2.7，這樣它才會動
+    branches: [ "master", "main", "3.2.7" ]
   pull_request:
     branches: [ "master", "main", "3.2.7" ]
 
